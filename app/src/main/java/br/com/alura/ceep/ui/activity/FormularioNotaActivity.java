@@ -6,6 +6,7 @@ import br.com.alura.ceep.R;
 import br.com.alura.ceep.dao.NotaDAO;
 import br.com.alura.ceep.model.Nota;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,6 +38,11 @@ public class FormularioNotaActivity extends AppCompatActivity {
 
             Nota nota = new Nota(titulo.getText().toString(), descricao.getText().toString());
             new NotaDAO().insere(nota);
+
+            //crio uma activity para aguardar um resultado.
+            Intent resultadoInsercao = new Intent();
+            resultadoInsercao.putExtra("nota", nota);
+            setResult(2, resultadoInsercao);
 
             finish();
         }

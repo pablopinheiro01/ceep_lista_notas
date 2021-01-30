@@ -5,8 +5,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import java.io.Serializable;
 import java.util.List;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import br.com.alura.ceep.R;
@@ -36,19 +38,24 @@ public class ListaNotasActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent iniciaFormularioNota = new Intent(ListaNotasActivity.this, FormularioNotaActivity.class);
-                 startActivity(iniciaFormularioNota);
+                 //startActivity(iniciaFormularioNota);
+                //criado uma activity enviando um resultado
+                startActivityForResult(iniciaFormularioNota, 1);
             }
         });
+    }
 
+    @Override //verifica se a requisicao pedida recebeu os parametros esperados
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if(requestCode == 1 && resultCode == 2 && data.hasExtra("nota")){
+            Nota notaRecebida = (Nota) data.getSerializableExtra("nota");
+            adapter.adiciona(notaRecebida);
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
     protected void onResume() {
-
-        List<Nota> notas = new NotaDAO().todos();
-        todasNotas.clear();
-        todasNotas.addAll(notas);
-        adapter.notifyDataSetChanged();;
         super.onResume();
     }
 
@@ -84,5 +91,10 @@ public class ListaNotasActivity extends AppCompatActivity {
     private void configuraAdapter(List<Nota> todasNotas, RecyclerView listaNotas) {
         adapter = new ListaNotasAdapter(todasNotas, this);
         listaNotas.setAdapter(adapter);
+    }
+
+    public void adiciona(Nota nota){
+        this.todasNotas.add(nota);
+        notifyAll();
     }
 }

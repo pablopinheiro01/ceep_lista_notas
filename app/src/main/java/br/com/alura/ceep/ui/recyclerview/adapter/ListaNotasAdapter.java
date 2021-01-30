@@ -51,6 +51,12 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
         return notas.size();
     }
 
+    public void adiciona(Nota notaRecebida) {
+        this.notas.add(notaRecebida);
+        //notifico o proprio adapter que foi feito uma alteração
+        notifyDataSetChanged();
+    }
+
     //classe interna para o uso da viewHolder, como este sera usado somente dentro deste adapter nao criamos uma classe externa
     class NotaViewHolder extends RecyclerView.ViewHolder {
 
