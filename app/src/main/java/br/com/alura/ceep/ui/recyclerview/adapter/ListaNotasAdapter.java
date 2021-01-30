@@ -34,20 +34,17 @@ public class ListaNotasAdapter extends RecyclerView.Adapter {
 
         View viewCriada = LayoutInflater.from(context).inflate(R.layout.item_nota, parent, false);
         Log.i("RecyclerView adapter", "onCreateViewHolder: view criada meninim -> "+quantidadeViewCriada++);
+
         return new NotaViewHolder(viewCriada);
     }
 
     @Override //realiza a vinculacao (reutilzando as views criadas no oncreateviewholder) para cada view criada durante o scroll
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Nota nota = notas.get(position);
-
-        TextView titulo = holder.itemView.findViewById(R.id.item_nota_titulo);
-        titulo.setText(nota.getTitulo());
-        TextView descricao = holder.itemView.findViewById(R.id.item_nota_descricao);
-        descricao.setText(nota.getDescricao());
+        //faco o cast do objeto holder para delegar a responsabilidade para o mesmo fazer o vinculo
+        NotaViewHolder notaViewHolder = (NotaViewHolder) holder; //podemos fazer um cast ou receber no generics da classe
 
         Log.i("recyclerView adapter", "bindViewHolder"+ "posicao: "+position + " quantidade : " + quantidadeBindView++);
-
     }
 
     @Override
@@ -58,9 +55,20 @@ public class ListaNotasAdapter extends RecyclerView.Adapter {
     //classe interna para o uso da viewHolder, como este sera usado somente dentro deste adapter nao criamos uma classe externa
     class NotaViewHolder extends RecyclerView.ViewHolder {
 
+        private final TextView titulo;
+        private final TextView descricao;
+
         public NotaViewHolder(@NonNull View itemView) {
             super(itemView);
+             this.titulo = itemView.findViewById(R.id.item_nota_titulo);
+             this.descricao = itemView.findViewById(R.id.item_nota_descricao);
         }
+
+        public void vincula(Nota nota){
+            titulo.setText(nota.getTitulo());
+            descricao.setText(nota.getDescricao());
+        }
+
     }
 
 
