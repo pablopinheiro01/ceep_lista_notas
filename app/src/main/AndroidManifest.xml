@@ -9,7 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Ceep">
-        <activity android:name=".ListaNotasActivity">
+        <activity android:name="br.com.alura.ceep.ui.activity.ListaNotasActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
