@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import br.com.alura.ceep.R;
 import br.com.alura.ceep.model.Nota;
 
-public class ListaNotasAdapter extends RecyclerView.Adapter {
+public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.NotaViewHolder> {
 
     private final List<Nota> notas;
     private Context context;
@@ -30,8 +30,7 @@ public class ListaNotasAdapter extends RecyclerView.Adapter {
 
     @NonNull
     @Override //cria a view de acordo com o layout e prepara para a exibicao do viewholder
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
+    public ListaNotasAdapter.NotaViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View viewCriada = LayoutInflater.from(context).inflate(R.layout.item_nota, parent, false);
         Log.i("RecyclerView adapter", "onCreateViewHolder: view criada meninim -> "+quantidadeViewCriada++);
 
@@ -39,10 +38,10 @@ public class ListaNotasAdapter extends RecyclerView.Adapter {
     }
 
     @Override //realiza a vinculacao (reutilzando as views criadas no oncreateviewholder) para cada view criada durante o scroll
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+    //aqui dentro so fica os processos que precisam ser feitos a cada vinculação a view
+    public void onBindViewHolder(@NonNull ListaNotasAdapter.NotaViewHolder holder, int position) {
         Nota nota = notas.get(position);
-        //faco o cast do objeto holder para delegar a responsabilidade para o mesmo fazer o vinculo
-        NotaViewHolder notaViewHolder = (NotaViewHolder) holder; //podemos fazer um cast ou receber no generics da classe
+        holder.vincula(nota);
 
         Log.i("recyclerView adapter", "bindViewHolder"+ "posicao: "+position + " quantidade : " + quantidadeBindView++);
     }
