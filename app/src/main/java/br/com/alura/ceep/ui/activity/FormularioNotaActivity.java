@@ -1,18 +1,18 @@
 package br.com.alura.ceep.ui.activity;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import br.com.alura.ceep.R;
-import br.com.alura.ceep.dao.NotaDAO;
-import br.com.alura.ceep.model.Nota;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import br.com.alura.ceep.R;
+import br.com.alura.ceep.model.Nota;
+
+import static br.com.alura.ceep.ui.activity.IConstantesActivity.CHAVE_NOTA;
+import static br.com.alura.ceep.ui.activity.IConstantesActivity.CODIGO_RESULTADO_NOTA_CRIADA;
 
 public class FormularioNotaActivity extends AppCompatActivity {
 
@@ -20,7 +20,6 @@ public class FormularioNotaActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_formulario_nota);
-
     }
 
     @Override
@@ -32,20 +31,30 @@ public class FormularioNotaActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int idDoItem = item.getItemId();
-        if(idDoItem == R.id.menu_formulario_salva){
-            EditText titulo = findViewById(R.id.formulario_nota_titulo);
-            EditText descricao = findViewById(R.id.formulario_nota_descricao);
-
-            Nota nota = new Nota(titulo.getText().toString(), descricao.getText().toString());
-            new NotaDAO().insere(nota);
-
-            //crio uma activity para aguardar um resultado.
-            Intent resultadoInsercao = new Intent();
-            resultadoInsercao.putExtra("nota", nota);
-            setResult(2, resultadoInsercao);
-
+        if(isMenuSalvaNota(idDoItem)){
+            Nota nota = criaNota();
+            retornaNota(nota);
             finish();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void retornaNota(Nota nota) {
+        //crio uma activity para aguardar um resultado.
+        Intent resultadoInsercao = new Intent();
+        resultadoInsercao.putExtra(CHAVE_NOTA, nota);
+        setResult(CODIGO_RESULTADO_NOTA_CRIADA, resultadoInsercao);
+    }
+
+    private Nota criaNota() {
+        //populo os EditTexts para criar a nota
+        EditText titulo = findViewById(R.id.formulario_nota_titulo);
+        EditText descricao = findViewById(R.id.formulario_nota_descricao);
+
+       return new Nota(titulo.getText().toString(), descricao.getText().toString());
+    }
+
+    private boolean isMenuSalvaNota(int idDoItem) {
+        return idDoItem == R.id.menu_formulario_salva;
     }
 }
