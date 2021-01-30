@@ -1,6 +1,9 @@
 package br.com.alura.ceep.ui.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
 
 import java.util.List;
 
@@ -14,6 +17,9 @@ import br.com.alura.ceep.ui.recyclerview.adapter.ListaNotasAdapter;
 public class ListaNotasActivity extends AppCompatActivity {
 
     public static final String APP_BAR_TITLE = "Notas";
+    private ListaNotasAdapter adapter;
+    private List<Nota> todasNotas;
+    private NotaDAO notaDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,24 +27,44 @@ public class ListaNotasActivity extends AppCompatActivity {
         setTitle(APP_BAR_TITLE);
         setContentView(R.layout.lista_notas_activity);
 
-        List<Nota> todasNotas = notasDeExemplo();
+        todasNotas = notasDeExemplo();
 
         configuraRecyclerView(todasNotas);
 
+        TextView botaoInsereNota = findViewById(R.id.lista_notas_insere_nota);
+        botaoInsereNota.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent iniciaFormularioNota = new Intent(ListaNotasActivity.this, FormularioNotaActivity.class);
+                 startActivity(iniciaFormularioNota);
+            }
+        });
+
+    }
+
+    @Override
+    protected void onResume() {
+
+        List<Nota> notas = new NotaDAO().todos();
+        todasNotas.clear();
+        todasNotas.addAll(notas);
+        adapter.notifyDataSetChanged();;
+        super.onResume();
     }
 
     private List<Nota> notasDeExemplo() {
-        NotaDAO dao = populaNotaDaoTeste();
-        return dao.todos();
+        NotaDAO todasNotas = populaNotaDaoTeste();
+
+        return todasNotas.todos();
     }
 
     private NotaDAO populaNotaDaoTeste() {
-        NotaDAO dao = new NotaDAO();
+        notaDao = new NotaDAO();
         for(int i = 0 ; i <= 2; i++){
-            dao.insere(new Nota("Nota de numero: "+i, "descricao de numero: "+i + " pequena descricao"));
-            dao.insere(new Nota("Nota de numero: "+i, "descricao de numero: "+i + " segunda descricao e bem maior do que a primeir "));
+            notaDao.insere(new Nota("Nota de numero: "+i, "descricao de numero: "+i + " pequena descricao"));
+            notaDao.insere(new Nota("Nota de numero: "+i, "descricao de numero: "+i + " segunda descricao e bem maior do que a primeir "));
         }
-        return dao;
+        return notaDao;
     }
 
     private void configuraRecyclerView(List<Nota> todasNotas) {
@@ -56,6 +82,7 @@ public class ListaNotasActivity extends AppCompatActivity {
     }*/
 
     private void configuraAdapter(List<Nota> todasNotas, RecyclerView listaNotas) {
-        listaNotas.setAdapter(new ListaNotasAdapter(todasNotas, this));
+        adapter = new ListaNotasAdapter(todasNotas, this);
+        listaNotas.setAdapter(adapter);
     }
 }
