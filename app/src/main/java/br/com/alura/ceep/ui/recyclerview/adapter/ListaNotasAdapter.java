@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import br.com.alura.ceep.R;
 import br.com.alura.ceep.model.Nota;
+import br.com.alura.ceep.ui.recyclerview.adapter.listener.OnItemClickListener;
 
 public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.NotaViewHolder> {
 
@@ -22,6 +23,13 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
     private static int quantidadeViewCriada = 0;
     //contador de teste para quantidade de bind realizado
     private static int quantidadeBindView = 0;
+
+    private OnItemClickListener onItemClickListener;
+
+    //criado o evento a partir da interface para que possa ser acessado e imnplementado por outros fora do adapter
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
+    }
 
     public ListaNotasAdapter(List<Nota> notas, Context contexto){
         this.context = contexto;
@@ -61,16 +69,26 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
 
         private final TextView titulo;
         private final TextView descricao;
+        private Nota nota;
 
         public NotaViewHolder(@NonNull View itemView) {
             super(itemView);
              this.titulo = itemView.findViewById(R.id.item_nota_titulo);
              this.descricao = itemView.findViewById(R.id.item_nota_descricao);
+
+             itemView.setOnClickListener(new View.OnClickListener() {
+                 @Override
+                 public void onClick(View v) {
+                     onItemClickListener.onItemClick(nota);
+                 }
+             });
         }
 
         public void vincula(Nota nota){
             titulo.setText(nota.getTitulo());
             descricao.setText(nota.getDescricao());
+            //preenche a nota que foi instanciada na innerClass NotaViewHolder
+            this.nota = nota;
         }
 
     }
