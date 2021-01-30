@@ -85,13 +85,7 @@ public class ListaNotasActivity extends AppCompatActivity {
     private boolean temNota(Intent data){
         return data.hasExtra(CHAVE_NOTA);
     }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-
+    
     private void configuraRecyclerView(List<Nota> todasNotas) {
         RecyclerView listaNotas = findViewById(R.id.lista_notas_recyclerview);
         configuraAdapter(todasNotas, listaNotas);
