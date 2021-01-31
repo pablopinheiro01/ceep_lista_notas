@@ -1,5 +1,6 @@
 package br.com.alura.ceep.ui.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -21,7 +22,6 @@ import static br.com.alura.ceep.ui.activity.IConstantesActivity.CHAVE_NOTA;
 import static br.com.alura.ceep.ui.activity.IConstantesActivity.CHAVE_POSICAO;
 import static br.com.alura.ceep.ui.activity.IConstantesActivity.CODIGO_REQUISICAO_ALTERA_NOTA;
 import static br.com.alura.ceep.ui.activity.IConstantesActivity.CODIGO_REQUISICAO_INSERE_NOTA;
-import static br.com.alura.ceep.ui.activity.IConstantesActivity.CODIGO_RESULTADO_NOTA_CRIADA;
 import static br.com.alura.ceep.ui.activity.IConstantesActivity.ERRO_POSICAO_NOTA_INVALIDA;
 import static br.com.alura.ceep.ui.activity.IConstantesActivity.POSICAO_INVALIDA;
 
@@ -71,25 +71,33 @@ public class ListaNotasActivity extends AppCompatActivity {
 
     @Override //verifica se a requisicao pedida recebeu os parametros esperados
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-        if(isResultadoInsereNota(requestCode, resultCode, data)){
-            Nota notaRecebida = (Nota) data.getSerializableExtra(CHAVE_NOTA);
-            adapter.adiciona(notaRecebida);
-        }
-
-        if(isResultadoAlteraNota(requestCode, data)){
-
-            int posicaoRecebida = data.getIntExtra(CHAVE_POSICAO, POSICAO_INVALIDA);
-            Nota notaRecebida = (Nota) data.getSerializableExtra(CHAVE_NOTA);
-
-            if(isPosicaoValida(posicaoRecebida)){
-                altera(posicaoRecebida, notaRecebida);
-            }else{
-                Toast.makeText(this, ERRO_POSICAO_NOTA_INVALIDA, Toast.LENGTH_LONG).show();
+        if(isResultadoInsereNota(requestCode, data)){
+            if(isResultOk(resultCode)){
+                Nota notaRecebida = (Nota) data.getSerializableExtra(CHAVE_NOTA);
+                adapter.adiciona(notaRecebida);
+            }else if (resultCode == Activity.RESULT_CANCELED){
+                //podemos tomar uma decisao para desfazer algo que foi realizado
             }
         }
 
-        super.onActivityResult(requestCode, resultCode, data);
+        if(isResultadoAlteraNota(requestCode, data)){
+            if(isResultOk(resultCode)){
+
+                int posicaoRecebida = data.getIntExtra(CHAVE_POSICAO, POSICAO_INVALIDA);
+                Nota notaRecebida = (Nota) data.getSerializableExtra(CHAVE_NOTA);
+
+                if(isPosicaoValida(posicaoRecebida)){
+                    altera(posicaoRecebida, notaRecebida);
+                }else{
+                    Toast.makeText(this, ERRO_POSICAO_NOTA_INVALIDA, Toast.LENGTH_LONG).show();
+                }
+            }else if( resultCode == Activity.RESULT_CANCELED){
+                //toma uma acao caso o resultado nao seja positivo
+            }
+        }
+
     }
 
     private void altera(int posicao, Nota nota) {
@@ -103,7 +111,6 @@ public class ListaNotasActivity extends AppCompatActivity {
 
     private boolean isResultadoAlteraNota(int requestCode, @Nullable Intent data) {
         return isCodigoRequisicaoAlteraNota(requestCode)
-                &&  isCodigoResultadoNotaCriada(CODIGO_RESULTADO_NOTA_CRIADA)
                 && temNota(data);
     }
 
@@ -111,9 +118,8 @@ public class ListaNotasActivity extends AppCompatActivity {
         return requestCode == CODIGO_REQUISICAO_ALTERA_NOTA;
     }
 
-    private boolean isResultadoInsereNota(int requestCode, int resultCode, @Nullable Intent data) {
+    private boolean isResultadoInsereNota(int requestCode, @Nullable Intent data) {
         return isCodigoRequisicaoInsereNota(requestCode) &&
-        isCodigoResultadoNotaCriada(resultCode) &&
         temNota(data);
     }
 
@@ -121,8 +127,8 @@ public class ListaNotasActivity extends AppCompatActivity {
         return requestCode == CODIGO_REQUISICAO_INSERE_NOTA;
     }
 
-    private boolean isCodigoResultadoNotaCriada(int resultCode){
-        return resultCode == CODIGO_RESULTADO_NOTA_CRIADA;
+    private boolean isResultOk(int resultCode){
+        return resultCode == Activity.RESULT_OK;
     }
 
     private boolean temNota(Intent data){

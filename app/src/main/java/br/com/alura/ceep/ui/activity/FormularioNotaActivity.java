@@ -1,5 +1,6 @@
 package br.com.alura.ceep.ui.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -14,7 +15,6 @@ import br.com.alura.ceep.model.Nota;
 
 import static br.com.alura.ceep.ui.activity.IConstantesActivity.CHAVE_NOTA;
 import static br.com.alura.ceep.ui.activity.IConstantesActivity.CHAVE_POSICAO;
-import static br.com.alura.ceep.ui.activity.IConstantesActivity.CODIGO_RESULTADO_NOTA_CRIADA;
 import static br.com.alura.ceep.ui.activity.IConstantesActivity.POSICAO_INVALIDA;
 
 public class FormularioNotaActivity extends AppCompatActivity {
@@ -74,7 +74,7 @@ public class FormularioNotaActivity extends AppCompatActivity {
         resultadoInsercao.putExtra(CHAVE_NOTA, nota);
         resultadoInsercao.putExtra(CHAVE_POSICAO, posicaoRecebida);
 
-        setResult(CODIGO_RESULTADO_NOTA_CRIADA, resultadoInsercao);
+        setResult(Activity.RESULT_OK, resultadoInsercao);
     }
 
     private Nota criaNota() {
