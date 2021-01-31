@@ -69,19 +69,21 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
     //altera o componente na tela
     public void altera(int posicao, Nota nota) {
         this.notas.set(posicao, nota);
-        notifyDataSetChanged();
+        notifyItemChanged(posicao);
+
     }
 
     //remove do componente da tela
     public void remove(int posicao) {
         notas.remove(posicao);
-        notifyDataSetChanged();
+        notifyItemRemoved(posicao);
     }
 
     //troca do componente da tela
     public void troca(int posicaoDaNotaInicial, int posicaoDaNotaFinal) {
         Collections.swap(notas, posicaoDaNotaInicial, posicaoDaNotaFinal);
-        notifyDataSetChanged();
+
+        notifyItemMoved(posicaoDaNotaInicial, posicaoDaNotaFinal);
     }
 
     //classe interna para o uso da viewHolder, como este sera usado somente dentro deste adapter nao criamos uma classe externa

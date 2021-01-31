@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,6 +18,8 @@ import static br.com.alura.ceep.ui.activity.IConstantesActivity.POSICAO_INVALIDA
 
 public class FormularioNotaActivity extends AppCompatActivity {
 
+    public static final String INSERIR_NOTA = "Inserir Nota";
+    public static final String ALTERA_NOTA = "Alterar Nota";
     //inicializado com uma posicao invalida
     private int posicaoRecebida = POSICAO_INVALIDA;
     private TextView titulo;
@@ -28,11 +29,13 @@ public class FormularioNotaActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_formulario_nota);
+        setTitle(INSERIR_NOTA);
         inicializaCampos();
 
         Intent dadosRecebidos = getIntent();
 
         if(dadosRecebidos.hasExtra(CHAVE_NOTA)){
+            setTitle(ALTERA_NOTA);
             Nota notaRecebida = (Nota) dadosRecebidos.getSerializableExtra(CHAVE_NOTA);
             // -1 para o valor default no caso de receber vazio
             posicaoRecebida = dadosRecebidos.getIntExtra(CHAVE_POSICAO, POSICAO_INVALIDA);

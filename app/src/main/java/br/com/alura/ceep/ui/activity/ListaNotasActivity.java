@@ -65,9 +65,7 @@ public class ListaNotasActivity extends AppCompatActivity {
 
     private List<Nota> pegaTodasNotas() {
         NotaDAO dao = new NotaDAO();
-        for(int i = 0; i <= 10; i++){
-            dao.insere(new Nota("Titulo "+ i," Descricao de numero "+i));
-        }
+
         return dao.todos();
     }
 
@@ -78,7 +76,9 @@ public class ListaNotasActivity extends AppCompatActivity {
         if(isResultadoInsereNota(requestCode, data)){
             if(isResultOk(resultCode)){
                 Nota notaRecebida = (Nota) data.getSerializableExtra(CHAVE_NOTA);
+                new NotaDAO().insere(notaRecebida);
                 adapter.adiciona(notaRecebida);
+
             }else if (resultCode == Activity.RESULT_CANCELED){
                 //podemos tomar uma decisao para desfazer algo que foi realizado
             }
@@ -134,7 +134,7 @@ public class ListaNotasActivity extends AppCompatActivity {
     }
 
     private boolean temNota(Intent data){
-        return data.hasExtra(CHAVE_NOTA);
+        return  data != null && data.hasExtra(CHAVE_NOTA);
     }
 
     private void configuraRecyclerView(List<Nota> todasNotas) {
