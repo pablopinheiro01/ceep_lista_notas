@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -67,6 +69,18 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
     //altera o componente na tela
     public void altera(int posicao, Nota nota) {
         this.notas.set(posicao, nota);
+        notifyDataSetChanged();
+    }
+
+    //remove do componente da tela
+    public void remove(int posicao) {
+        notas.remove(posicao);
+        notifyDataSetChanged();
+    }
+
+    //troca do componente da tela
+    public void troca(int posicaoDaNotaInicial, int posicaoDaNotaFinal) {
+        Collections.swap(notas, posicaoDaNotaInicial, posicaoDaNotaFinal);
         notifyDataSetChanged();
     }
 
