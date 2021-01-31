@@ -64,6 +64,12 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
         notifyDataSetChanged();
     }
 
+    //altera o componente na tela
+    public void altera(int posicao, Nota nota) {
+        this.notas.set(posicao, nota);
+        notifyDataSetChanged();
+    }
+
     //classe interna para o uso da viewHolder, como este sera usado somente dentro deste adapter nao criamos uma classe externa
     class NotaViewHolder extends RecyclerView.ViewHolder {
 
@@ -79,9 +85,21 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
              itemView.setOnClickListener(new View.OnClickListener() {
                  @Override
                  public void onClick(View v) {
-                     onItemClickListener.onItemClick(nota);
+                     //o metodo getAdapterPosition e do proprio viewHolder que conhece a posicao clicada do item na tela
+                     onItemClickListener.onItemClick(nota, getAdapterPosition());
                  }
              });
+
+             //caso queiramos implementar um novo tipo de clique no item.
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    //implementação do clique longo
+                    return false;
+                }
+            });
+
+
         }
 
         public void vincula(Nota nota){
