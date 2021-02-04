@@ -3,6 +3,7 @@ package br.com.alura.ceep.ui.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -24,6 +25,7 @@ public class FormularioNotaActivity extends AppCompatActivity {
     private int posicaoRecebida = POSICAO_INVALIDA;
     private TextView titulo;
     private TextView descricao;
+    private Nota nota;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,14 +35,16 @@ public class FormularioNotaActivity extends AppCompatActivity {
         inicializaCampos();
 
         Intent dadosRecebidos = getIntent();
+        nota = new Nota();
 
         if(dadosRecebidos.hasExtra(CHAVE_NOTA)){
             setTitle(ALTERA_NOTA);
-            Nota notaRecebida = (Nota) dadosRecebidos.getSerializableExtra(CHAVE_NOTA);
+            nota = (Nota) dadosRecebidos.getSerializableExtra(CHAVE_NOTA);
+            Log.i("FormularioNota",nota.toString());
             // -1 para o valor default no caso de receber vazio
             posicaoRecebida = dadosRecebidos.getIntExtra(CHAVE_POSICAO, POSICAO_INVALIDA);
 
-            preencheCampos(notaRecebida);
+            preencheCampos(nota);
 
         }
     }
@@ -63,15 +67,30 @@ public class FormularioNotaActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int idDoItem = item.getItemId();
+        Log.i("MENU SALVA","Clicado no menu salva");
         if(isMenuSalvaNota(idDoItem)){
-            Nota nota = criaNota();
+            Log.i("MENU SALVA","Clicado no menu salva");
+            Log.i("MENU SALVA","nota e nula ? "+ nota.getId());
+
+            if(nota.getId() != null){
+                nota = preencheAtualizacao(nota);
+            }else{
+                nota = criaNota();
+            }
             retornaNota(nota);
             finish();
         }
         return super.onOptionsItemSelected(item);
     }
 
+    private Nota preencheAtualizacao(Nota nota) {
+        titulo = findViewById(R.id.formulario_nota_titulo);
+        descricao = findViewById(R.id.formulario_nota_descricao);
+        return new Nota(titulo.getText().toString(), descricao.getText().toString(), nota.getId(), nota.getOrdem());
+    }
+
     private void retornaNota(Nota nota) {
+        Log.i("RetornaNOTA", "Retornando a nota: "+nota.toString());
         //crio uma activity para aguardar um resultado.
         Intent resultadoInsercao = new Intent();
         resultadoInsercao.putExtra(CHAVE_NOTA, nota);

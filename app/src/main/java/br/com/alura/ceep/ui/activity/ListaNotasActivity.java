@@ -3,10 +3,12 @@ package br.com.alura.ceep.ui.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.Nullable;
@@ -14,7 +16,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import br.com.alura.ceep.R;
+import br.com.alura.ceep.asynctask.BasicAsyncTask;
 import br.com.alura.ceep.dao.NotaDAO;
+import br.com.alura.ceep.database.CeepDatabase;
 import br.com.alura.ceep.model.Nota;
 import br.com.alura.ceep.ui.recyclerview.adapter.ListaNotasAdapter;
 import br.com.alura.ceep.ui.recyclerview.adapter.listener.OnItemClickListener;
@@ -31,6 +35,7 @@ public class ListaNotasActivity extends AppCompatActivity {
 
     public static final String APP_BAR_TITLE = "Notas";
     private ListaNotasAdapter adapter;
+    private NotaDAO notaDAO;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,11 +43,38 @@ public class ListaNotasActivity extends AppCompatActivity {
         setTitle(APP_BAR_TITLE);
         setContentView(R.layout.lista_notas_activity);
 
-        List<Nota> notas = pegaTodasNotas();
+        notaDAO = CeepDatabase.getInstance(this).getNotaDao();
 
-        configuraRecyclerView(notas);
+        List<Nota> resultado = pegaTodasNotas();
 
+        for(Nota nota: resultado){
+            Log.i("NOTAONCREATE", nota.toString());
+        }
+
+        configuraRecyclerView(resultado);
         configuraBotaoInsereNota();
+    }
+
+    @Override
+    protected void onResume() {
+        Log.i("CHAMANDOONRESUME","CHAMANDOONRESUME");
+        super.onResume();
+//        adapter.atualiza(this.notaDAO.todos());
+        new BasicAsyncTask<List<Nota>>(new BasicAsyncTask.ExecutaListener<List<Nota>>() {
+            @Override
+            public List<Nota> quandoExecuta() {
+                Log.i("ASYNC ONRESUME", "executando...");
+                List<Nota> notas =  notaDAO.todos();
+                for(Nota n: notas){
+                    Log.i("LISTAONR", n.toString());
+                }
+                return notas;
+            }
+        }, (resultado) -> {
+            Log.i("ASYNC ONRESUME", "devolvendo na tela...");
+            adapter.atualiza(resultado);
+        }).execute();
+
 
     }
 
@@ -64,9 +96,23 @@ public class ListaNotasActivity extends AppCompatActivity {
     }
 
     private List<Nota> pegaTodasNotas() {
-        NotaDAO dao = new NotaDAO();
 
-        return dao.todos();
+        List<Nota> retorno = new ArrayList<>();
+
+        new BasicAsyncTask<List<Nota>>( () -> {
+
+             if(notaDAO.todos().size() == 0){
+                 Log.i("Chamada assync", "Tamanho da nota: "+ notaDAO.todos().size());
+                 return new ArrayList<Nota>();
+             }else{
+                 return notaDAO.todos();
+             }
+
+        }, resultado -> {
+            retorno.addAll(resultado);
+        }).execute();
+
+        return retorno;
     }
 
     @Override //verifica se a requisicao pedida recebeu os parametros esperados
@@ -74,10 +120,27 @@ public class ListaNotasActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(isResultadoInsereNota(requestCode, data)){
+            Log.i("notarecebida: ", "Entrou em isResultadoInsereNota");
             if(isResultOk(resultCode)){
-                Nota notaRecebida = (Nota) data.getSerializableExtra(CHAVE_NOTA);
-                new NotaDAO().insere(notaRecebida);
-                adapter.adiciona(notaRecebida);
+                Log.i("notarecebida: ", "Entrou em isResultOk");
+                Nota notaRecebidaDoFormulario = (Nota) data.getSerializableExtra(CHAVE_NOTA);
+                Nota notaRecebida = new Nota(notaRecebidaDoFormulario.getTitulo(), notaRecebidaDoFormulario.getDescricao());
+                Log.i("notarecebida: ", notaRecebida.toString());
+
+                new BasicAsyncTask<Nota>(() -> {
+                    Log.i("AsyncTask nota:", notaRecebida.toString());
+                    long id = notaDAO.insere(notaRecebida);
+
+                    notaDAO.atualizaOrdemDaNota(id, id);
+                    Log.i("AsyncTask nota:", "Id da nota inserida: "+id);
+                    Log.i("AsyncTask notainserida:", notaDAO.pesquisaNotaPorTitulo(notaRecebida.getTitulo()).toString() );
+                    return notaDAO.pesquisaNotaPorPosicao(id);
+                }, new BasicAsyncTask.FinalizadaListener<Nota>() {
+                    @Override
+                    public void quandoFinalizada(Nota resultado) {
+                        adapter.adiciona(resultado);
+                    }
+                }).execute();
 
             }else if (resultCode == Activity.RESULT_CANCELED){
                 //podemos tomar uma decisao para desfazer algo que foi realizado
@@ -89,7 +152,7 @@ public class ListaNotasActivity extends AppCompatActivity {
 
                 int posicaoRecebida = data.getIntExtra(CHAVE_POSICAO, POSICAO_INVALIDA);
                 Nota notaRecebida = (Nota) data.getSerializableExtra(CHAVE_NOTA);
-
+                Log.i("NotaRecebida",notaRecebida.toString());
                 if(isPosicaoValida(posicaoRecebida)){
                     altera(posicaoRecebida, notaRecebida);
                 }else{
@@ -103,8 +166,29 @@ public class ListaNotasActivity extends AppCompatActivity {
     }
 
     private void altera(int posicao, Nota nota) {
-        new NotaDAO().altera(posicao, nota);
-        adapter.altera(posicao, nota);
+//        new NotaDAO().altera(posicao, nota);
+
+        new BasicAsyncTask<Nota>(new BasicAsyncTask.ExecutaListener<Nota>() {
+            @Override
+            public Nota quandoExecuta() {
+                Log.i("AsyncTask","Nota recebida: "+nota.toString());
+                notaDAO.altera(nota);
+                List<Nota> notas = notaDAO.todos();
+                Log.i("ITERANDO ASYNKTASK", "========================================================================");
+                for(Nota nota: notas){
+                    Log.i("AsyncTask",nota.toString());
+                }
+                Log.i("ITERANDO ASYNKTASK", "========================================================================");
+
+                return null;
+            }
+        }, new BasicAsyncTask.FinalizadaListener<Nota>() {
+            @Override
+            public void quandoFinalizada(Nota resultado) {
+                adapter.altera(posicao, nota);
+            }
+        }).execute();
+
     }
 
     private boolean isPosicaoValida(int posicaoRecebida) {
@@ -145,11 +229,12 @@ public class ListaNotasActivity extends AppCompatActivity {
 
     private void configuraItemTouchHelper(RecyclerView listaNotas) {
         //configurando animacao
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new NotaItemTouchHelperCallBack(adapter));
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new NotaItemTouchHelperCallBack(adapter, notaDAO));
         itemTouchHelper.attachToRecyclerView(listaNotas);
     }
 
     private void configuraAdapter(List<Nota> todasNotas, RecyclerView listaNotas) {
+
         adapter = new ListaNotasAdapter(todasNotas, this);
         listaNotas.setAdapter(adapter);
         adapter.setOnItemClickListener(new OnItemClickListener() {

@@ -51,7 +51,10 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
     //aqui dentro so fica os processos que precisam ser feitos a cada vinculação a view
     public void onBindViewHolder(@NonNull ListaNotasAdapter.NotaViewHolder holder, int position) {
         Nota nota = notas.get(position);
+        Log.i("ONBINDVIEWHOLDER", "==============================================================================");
+        Log.i("ONBINDVIEWHOLDER", nota.toString());
         holder.vincula(nota);
+        Log.i("ONBINDVIEWHOLDER", "==============================================================================");
         Log.i("recyclerView adapter", "bindViewHolder"+ "posicao: "+position + " quantidade : " + quantidadeBindView++);
     }
 
@@ -84,6 +87,19 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
         Collections.swap(notas, posicaoDaNotaInicial, posicaoDaNotaFinal);
 
         notifyItemMoved(posicaoDaNotaInicial, posicaoDaNotaFinal);
+    }
+
+    public void atualiza(List<Nota> notas) {
+        if(notas != null){
+            for(Nota nota: this.notas){
+                Log.i("LISTARESULTADOONRES", nota.toString());
+            }
+            if(this.notas.size() <= 0){
+                this.notas.addAll(notas);
+            }
+            notifyDataSetChanged();
+        }
+
     }
 
     //classe interna para o uso da viewHolder, como este sera usado somente dentro deste adapter nao criamos uma classe externa
@@ -119,10 +135,16 @@ public class ListaNotasAdapter extends RecyclerView.Adapter<ListaNotasAdapter.No
         }
 
         public void vincula(Nota nota){
-            titulo.setText(nota.getTitulo());
-            descricao.setText(nota.getDescricao());
             //preenche a nota que foi instanciada na innerClass NotaViewHolder
             this.nota = nota;
+
+            Log.i("VINCULANDO AS NOTAS", "=============================================================================");
+            Log.i("ViewHolder:Vincula", nota.toString());
+            Log.i("ViewHolder:Vincula", this.nota.toString());
+            Log.i("VINCULANDO AS NOTAS", "=============================================================================");
+
+            titulo.setText(nota.getTitulo());
+            descricao.setText(nota.getDescricao());
         }
 
     }

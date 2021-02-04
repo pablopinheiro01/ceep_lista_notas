@@ -1,16 +1,21 @@
 package br.com.alura.ceep.ui.recyclerview.helper.callback;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
+import br.com.alura.ceep.asynctask.BasicAsyncTask;
 import br.com.alura.ceep.dao.NotaDAO;
 import br.com.alura.ceep.ui.recyclerview.adapter.ListaNotasAdapter;
 
 public class NotaItemTouchHelperCallBack extends ItemTouchHelper.Callback {
 
     private final ListaNotasAdapter adapter;
+    private NotaDAO dao;
 
-    public NotaItemTouchHelperCallBack(ListaNotasAdapter adapter){
+    public NotaItemTouchHelperCallBack(ListaNotasAdapter adapter, NotaDAO dao){
+        this.dao = dao;
         this.adapter = adapter;
     }
 
@@ -26,6 +31,7 @@ public class NotaItemTouchHelperCallBack extends ItemTouchHelper.Callback {
 
     @Override
     public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+
         int posicaoDaNotaInicial = viewHolder.getAdapterPosition();
         int posicaoDaNotaFinal = target.getAdapterPosition();
         trocaNotas(posicaoDaNotaInicial, posicaoDaNotaFinal);
@@ -34,8 +40,22 @@ public class NotaItemTouchHelperCallBack extends ItemTouchHelper.Callback {
     }
 
     private void trocaNotas(int posicaoDaNotaInicial, int posicaoDaNotaFinal) {
-        new NotaDAO().troca(posicaoDaNotaInicial, posicaoDaNotaFinal);
-        adapter.troca(posicaoDaNotaInicial, posicaoDaNotaFinal);
+//        new NotaDAO().troca(posicaoDaNotaInicial, posicaoDaNotaFinal);
+
+        new BasicAsyncTask<Void>(new BasicAsyncTask.ExecutaListener<Void>() {
+            @Override
+            public Void quandoExecuta() {
+
+                dao.troca(posicaoDaNotaInicial,posicaoDaNotaFinal);
+
+                return null;
+            }
+        }, new BasicAsyncTask.FinalizadaListener<Void>() {
+            @Override
+            public void quandoFinalizada(Void resultado) {
+                adapter.troca(posicaoDaNotaInicial, posicaoDaNotaFinal);
+            }
+        }).execute();
     }
 
     @Override
@@ -45,9 +65,24 @@ public class NotaItemTouchHelperCallBack extends ItemTouchHelper.Callback {
     }
 
     private void removeNota(int posicaoDaNotaDeslizada) {
-        new NotaDAO().remove(posicaoDaNotaDeslizada);
+//        new NotaDAO().remove(posicaoDaNotaDeslizada);
         //remove do adapter
-        adapter.remove(posicaoDaNotaDeslizada);
+        new BasicAsyncTask<Void>(new BasicAsyncTask.ExecutaListener<Void>() {
+            @Override
+            public Void quandoExecuta() {
+                Log.i("REMOVENOTA","Posicao da nota que sera removida: "+posicaoDaNotaDeslizada);
+
+                dao.remove(posicaoDaNotaDeslizada);
+                return null;
+            }
+        }, new BasicAsyncTask.FinalizadaListener<Void>() {
+            @Override
+            public void quandoFinalizada(Void resultado) {
+                Log.i("REMOVENOTA","Finalizado e removido: "+posicaoDaNotaDeslizada);
+                adapter.remove(posicaoDaNotaDeslizada);
+            }
+        }).execute();
+
     }
 
 }
